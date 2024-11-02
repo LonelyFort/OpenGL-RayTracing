@@ -1,6 +1,6 @@
 //============================================================
-// STUDENT NAME:
-// NUS User ID.:
+// STUDENT NAME: Liu Yu-Wei
+// NUS User ID.: E1122378
 // COMMENTS TO GRADER:
 //
 // ============================================================
@@ -105,33 +105,47 @@ Color Raytrace::TraceRay( const Ray &ray, const Scene &scene,
 
 
     //**********************************
-    result = nearestHitRec.material.k_d;  // REMOVE THIS LINE AFTER YOU HAVE FINISHED CODE BELOW.
+    //result = nearestHitRec.material.k_d;  // REMOVE THIS LINE AFTER YOU HAVE FINISHED CODE BELOW.
     //**********************************
 
 
 // Add to result the phong lighting contributed by each point light source.
 // Compute for shadow if hasShadow is true.
 
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+    for (PointLightSource lightsrc : scene.ptLights) {
+        Vector3d L = (lightsrc.position - nearestHitRec.p).unitVector();
 
+        Color kshadow(1.0, 1.0, 1.0);
 
+        if (hasShadow) {
+
+            //initiate Shadow Ray
+            Ray shadowRay(nearestHitRec.p, L);
+
+            //check blockage
+            for (auto& surface : scene.surfaces) {
+                double maxT = (lightsrc.position - nearestHitRec.p).length();
+                if (surface->shadowHit(shadowRay, DEFAULT_TMIN, maxT)) {
+                    kshadow.setRGB(0.0, 0.0, 0.0);
+                    break;
+                }
+            }
+        }
+        result += kshadow * computePhongLighting(L, N, V, nearestHitRec.material, lightsrc);
+    }
 
 // Add to result the global ambient lighting.
 
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
-
-
+    result += scene.amLight.I_a * nearestHitRec.material.k_a;
 
 // Add to result the reflection of the scene.
 
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+    if (reflectLevels > 0) {
+        //reflect ray from camera for subsequent reflections
+        Vector3d reflectedVector = mirrorReflect(V, N);
+        Ray reflectedRay = Ray(nearestHitRec.p, reflectedVector);
 
-
+        result += nearestHitRec.material.k_rg * TraceRay(reflectedRay, scene, reflectLevels - 1, hasShadow);
+    }
     return result;
 }
