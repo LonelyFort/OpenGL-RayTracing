@@ -36,7 +36,7 @@ bool Sphere::hit( const Ray &r, double tmin, double tmax, SurfaceHitRecord &rec 
 
     rec.t = t;
     rec.p = r.pointAtParam(t);
-    rec.normal = r.pointAtParam(t).unitVector();
+    rec.normal = (r.pointAtParam(t) - center).unitVector();
     rec.material = material;
 
     return true;
@@ -60,5 +60,6 @@ bool Sphere::shadowHit( const Ray &r, double tmin, double tmax ) const
     double t2 = (-b + sqrt(d)) / (2 * a);
     if (t1 >= 0) t = t1;
     else t = t2;
+    if (t < 0) return false;
     return (t >= tmin && t <= tmax);
 }
