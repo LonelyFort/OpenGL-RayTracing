@@ -104,11 +104,6 @@ Color Raytrace::TraceRay( const Ray &ray, const Scene &scene,
     Color result( 0.0f, 0.0f, 0.0f );   // The result will be accumulated here.
 
 
-    //**********************************
-    //result = nearestHitRec.material.k_d;  // REMOVE THIS LINE AFTER YOU HAVE FINISHED CODE BELOW.
-    //**********************************
-
-
 // Add to result the phong lighting contributed by each point light source.
 // Compute for shadow if hasShadow is true.
 

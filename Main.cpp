@@ -1,6 +1,6 @@
 //============================================================
-// STUDENT NAME:
-// NUS User ID.:
+// STUDENT NAME: Liu Yu-Wei
+// NUS User ID.: E1122378
 // COMMENTS TO GRADER:
 //
 // ============================================================
@@ -26,7 +26,7 @@
 static constexpr int imageWidth1 = 640;
 static constexpr int imageHeight1 = 480;
 static constexpr int reflectLevels1 = 2;  // 0 -- object does not reflect scene.
-static constexpr int hasShadow1 = true;
+static constexpr int hasShadow1 = false;
 static constexpr std::string_view outImageFile1 = "out1.png";
 
 // Constants for Scene 2.
@@ -96,6 +96,7 @@ void DefineScene2( Scene &scene, int imageWidth, int imageHeight );
 
 int main()
 {
+/*
 // Define Scene 1.
 
     Scene scene1;
@@ -114,7 +115,8 @@ int main()
         delete surface;
     }
 
-/*
+*/
+
 // Define Scene 2.
 
     Scene scene2;
@@ -132,7 +134,6 @@ int main()
     {
         delete surface;
     }
-*/
 
     std::cout << "All done. Press Enter to exit." << std::endl;
     std::cin.get();
@@ -293,10 +294,170 @@ void DefineScene1( Scene &scene, int imageWidth, int imageHeight )
 // Modeling of Scene 2.
 ///////////////////////////////////////////////////////////////////////////
 
+void DrawTetrahedron(Vector3d c, Scene& s, Material m, double scale, bool rotateX, bool rotateY, bool rotateZ);
+
+void DrawTetrahedron(Vector3d c, Scene& s,  Material m, double scale, bool rotateX, bool rotateY, bool rotateZ) {
+    
+    // draw out the four coordinates of the tetrahedron
+
+    Vector3d v1 = Vector3d(1, 0, - (1 / sqrt(2)));
+
+    Vector3d v2 = Vector3d(-1, 0, -(1 / sqrt(2)));
+
+    Vector3d v3 = Vector3d(0, 1, 1 / sqrt(2));
+
+    Vector3d v4 = Vector3d(0, -1, 1 / sqrt(2));
+
+    // do necessary transformation
+
+    v1 *= scale; v2 *= scale; v3 *= scale; v4 *= scale;
+
+    double rotation = 180;
+
+    if (rotateX) {
+        v1 = Vector3d(v1.x(), dot(v1, Vector3d(0, cos(rotation), -sin(rotation))),
+            dot(v1, Vector3d(0, sin(rotation), cos(rotation))));
+
+        v2 = Vector3d(v2.x(), dot(v2, Vector3d(0, cos(rotation), -sin(rotation))),
+            dot(v2, Vector3d(0, sin(rotation), cos(rotation))));
+
+        v3 = Vector3d(v3.x(), dot(v3, Vector3d(0, cos(rotation), -sin(rotation))),
+            dot(v3, Vector3d(0, sin(rotation), cos(rotation))));
+
+        v4 = Vector3d(v4.x(), dot(v4, Vector3d(0, cos(rotation), -sin(rotation))),
+            dot(v4, Vector3d(0, sin(rotation), cos(rotation))));
+    }
+
+    else if (rotateY) {
+        v1 = Vector3d(dot(v1, Vector3d(cos(rotation), 0, sin(rotation))), v1.y(),
+            dot(v1, Vector3d(-sin(rotation), 0, cos(rotation))));
+
+        v2 = Vector3d(dot(v2, Vector3d(cos(rotation), 0, sin(rotation))), v2.y(),
+            dot(v2, Vector3d(-sin(rotation), 0, cos(rotation))));
+
+        v3 = Vector3d(dot(v3, Vector3d(cos(rotation), 0, sin(rotation))), v3.y(),
+            dot(v3, Vector3d(-sin(rotation), 0, cos(rotation))));
+
+        v4 = Vector3d(dot(v4, Vector3d(cos(rotation), 0, sin(rotation))), v4.y(),
+            dot(v4, Vector3d(-sin(rotation), 0, cos(rotation))));
+    }
+
+    else if (rotateZ) {
+        v1 = Vector3d(dot(v1, Vector3d(cos(rotation), -sin(rotation), 0)),
+            dot(v1, Vector3d(sin(rotation), cos(rotation), 0)),
+            v1.z());
+
+        v2 = Vector3d(dot(v2, Vector3d(cos(rotation), -sin(rotation), 0)),
+            dot(v2, Vector3d(sin(rotation), cos(rotation), 0)),
+            v2.z());
+
+        v3 = Vector3d(dot(v3, Vector3d(cos(rotation), -sin(rotation), 0)),
+            dot(v3, Vector3d(sin(rotation), cos(rotation), 0)),
+            v3.z());
+
+        v4 = Vector3d(dot(v4, Vector3d(cos(rotation), -sin(rotation), 0)),
+            dot(v4, Vector3d(sin(rotation), cos(rotation), 0)),
+            v4.z());
+    }
+
+    // transform to centre c
+
+    v1 += c; v2 += c; v3 += c; v4 += c;
+
+    // Draw Spike
+
+    auto t1 = new Triangle(v1, v2, v3, m);
+    auto t2 = new Triangle(v1, v3, v4, m);
+    auto t3 = new Triangle(v2, v3, v4, m);
+    auto t4 = new Triangle(v1, v2, v4, m);
+
+    s.surfaces.push_back(t1);
+    s.surfaces.push_back(t2);
+    s.surfaces.push_back(t3);
+    s.surfaces.push_back(t4);
+    
+}
+
 void DefineScene2( Scene &scene, int imageWidth, int imageHeight )
 {
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+    // background and ambient
+
+    scene.backgroundColor = Color(0.098f, 0.098f, 0.439f);
+
+    scene.amLight.I_a = Color(0.6f, 0.6f, 0.6f) * 0.25f;
+    
+    // materials
+
+    // Midnight blue
+    Material midnightBlue = Material();
+    midnightBlue.k_d = Color(0.098f, 0.098f, 0.439f);
+    midnightBlue.k_a = midnightBlue.k_d;
+    midnightBlue.k_r = Color(0.8f, 0.8f, 0.8f) / 1.5f;
+    midnightBlue.k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
+    midnightBlue.n = 128.0f;
+
+    // Bright Yellow.
+    Material yellow = Material();
+    yellow.k_d = Color(1.0f, 1.0f, 0.0f);
+    yellow.k_a = yellow.k_d;
+    yellow.k_r = Color(1.0f, 1.0f, 1.0f);
+    yellow.k_rg = Color(1.0f, 1.0f, 1.0f);
+    yellow.n = 0.0f;
+
+
+    // Insert material 
+    scene.materials = { yellow, midnightBlue };
+
+
+    // point light sources
+
+    scene.ptLights.resize(2);
+
+    PointLightSource light0 = { Vector3d(100.0, 120.0, 10.0), Color(1.0f, 1.0f, 1.0f) * 0.3f };
+    PointLightSource light1 = { Vector3d(5.0, 80.0, 60.0), Color(1.0f, 1.0f, 1.0f) * 0.3f };
+
+    scene.ptLights = { light0, light1 }; 
+
+
+    // surface primitives
+
+    scene.surfaces.resize(15);
+
+    auto horzPlane = new Plane(0.0, 1.0, 0.0, 0.0, scene.materials[1]); // Horizontal plane.
+    auto leftVertPlane = new Plane(1.0, 0.0, 0.0, 0.0, scene.materials[1]); // Left vertical plane.
+    auto rightVertPlane = new Plane(0.0, 0.0, 1.0, 0.0, scene.materials[1]); // Right vertical plane.
+    scene.surfaces = { horzPlane, leftVertPlane, rightVertPlane };
+
+    // Draw the stars
+    DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], 30, 0, 0, 0);
+    DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], -30, 0, 0, 0);
+
+    DrawTetrahedron(Vector3d(35, 75, 100), scene, scene.materials[0], 15, 1, 0, 0);
+    DrawTetrahedron(Vector3d(35, 75, 100), scene, scene.materials[0], -15, 1, 0, 0);
+
+    DrawTetrahedron(Vector3d(120, 23, 70), scene, scene.materials[0], 5, 0, 0, 1);
+    DrawTetrahedron(Vector3d(120, 23, 70), scene, scene.materials[0], -5, 0, 0, 1);
+
+    DrawTetrahedron(Vector3d(45, 50, 130), scene, scene.materials[0], 5, 0, 0, 1);
+    DrawTetrahedron(Vector3d(45, 50, 130), scene, scene.materials[0], -5, 0, 0, 1);
+
+    DrawTetrahedron(Vector3d(120, 80, 70), scene, scene.materials[0], 5, 1, 0, 1);
+    DrawTetrahedron(Vector3d(120, 80, 70), scene, scene.materials[0], -5, 1, 0, 1);
+
+    DrawTetrahedron(Vector3d(35, 70, 20), scene, scene.materials[0], 10, 0, 1, 0);
+    DrawTetrahedron(Vector3d(35, 70, 20), scene, scene.materials[0], -10, 0, 1, 0);
+
+    DrawTetrahedron(Vector3d(56, 11, 130), scene, scene.materials[0], 10, 1, 0, 1);
+    DrawTetrahedron(Vector3d(56, 11, 130), scene, scene.materials[0], -10, 1, 0, 1);
+
+
+    // camera
+    scene.camera = Camera(Vector3d(200.0, 120.0, 200.0),  // eye
+        Vector3d(45.0, 22.0, 55.0),  // lookAt
+        Vector3d(0.0, 1.0, 0.0),  //upVector
+        (-1.0 * imageWidth) / imageHeight,  // left
+        (1.0 * imageWidth) / imageHeight,  // right
+        -1.0, 1.0, 3.0,  // bottom, top, near
+        imageWidth, imageHeight);  // image_width, image_height
 
 }
