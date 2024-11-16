@@ -96,7 +96,7 @@ void DefineScene2( Scene &scene, int imageWidth, int imageHeight );
 
 int main()
 {
-/*
+
 // Define Scene 1.
 
     Scene scene1;
@@ -115,7 +115,6 @@ int main()
         delete surface;
     }
 
-*/
 
 // Define Scene 2.
 
@@ -396,17 +395,25 @@ void DefineScene2( Scene &scene, int imageWidth, int imageHeight )
     midnightBlue.k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
     midnightBlue.n = 128.0f;
 
-    // Bright Yellow.
+    // Yellow.
     Material yellow = Material();
     yellow.k_d = Color(1.0f, 1.0f, 0.0f);
     yellow.k_a = yellow.k_d;
     yellow.k_r = Color(1.0f, 1.0f, 1.0f);
     yellow.k_rg = Color(1.0f, 1.0f, 1.0f);
-    yellow.n = 0.0f;
+    yellow.n = 8.0f;
+
+    // Bright Yellow.
+    Material Brightyellow = Material();
+    Brightyellow.k_d = Color(1.0f, 1.0f, 0.0f);
+    Brightyellow.k_a = Brightyellow.k_d;
+    Brightyellow.k_r = Color(1.0f, 1.0f, 1.0f);
+    Brightyellow.k_rg = Color(1.0f, 1.0f, 1.0f);
+    Brightyellow.n = 0.0f;
 
 
     // Insert material 
-    scene.materials = { yellow, midnightBlue };
+    scene.materials = { Brightyellow, midnightBlue, yellow };
 
 
     // point light sources
@@ -426,11 +433,12 @@ void DefineScene2( Scene &scene, int imageWidth, int imageHeight )
     auto horzPlane = new Plane(0.0, 1.0, 0.0, 0.0, scene.materials[1]); // Horizontal plane.
     auto leftVertPlane = new Plane(1.0, 0.0, 0.0, 0.0, scene.materials[1]); // Left vertical plane.
     auto rightVertPlane = new Plane(0.0, 0.0, 1.0, 0.0, scene.materials[1]); // Right vertical plane.
-    scene.surfaces = { horzPlane, leftVertPlane, rightVertPlane };
+    auto Moon = new Sphere(Vector3d(70.0, 40.0, 80.0), 30.0, scene.materials[2]);
+    scene.surfaces = { horzPlane, leftVertPlane, rightVertPlane, Moon};
 
     // Draw the stars
-    DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], 30, 0, 0, 0);
-    DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], -30, 0, 0, 0);
+    /*DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], 30, 0, 0, 0);
+    DrawTetrahedron(Vector3d(70, 40, 80), scene, scene.materials[0], -30, 0, 0, 0);*/
 
     DrawTetrahedron(Vector3d(35, 75, 100), scene, scene.materials[0], 15, 1, 0, 0);
     DrawTetrahedron(Vector3d(35, 75, 100), scene, scene.materials[0], -15, 1, 0, 0);
